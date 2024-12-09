@@ -1,3 +1,4 @@
+# parallel bayesian optimization
 import warnings
 import numpy as np
 from concurrent.futures import ThreadPoolExecutor, as_completed
