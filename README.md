@@ -23,4 +23,6 @@ complexity.py
 
 memory_manager.py
 
+parallel_bayesian_optimization.py
+
 List is being updated actively.
