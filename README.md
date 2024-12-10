@@ -21,4 +21,6 @@ parallel_utils.py
 
 complexity.py
 
+memory_manager.py
+
 List is being updated actively.
