@@ -1,7 +1,7 @@
-# Internal Monitor start
-
 import psutil
+import subprocess
 import time
+#Internal Process Monitor 
 from collections import deque
 from typing import Dict, Optional
 
@@ -67,12 +67,27 @@ class InternalProcessMonitor:
     def monitor_cpu_usage(self) -> None:
         """
         Records the current CPU usage.
+        Falls back to subprocess if psutil fails.
         """
-        current_cpu = psutil.cpu_percent()
+        try:
+            current_cpu = psutil.cpu_percent()
+        except (PermissionError, AttributeError, RuntimeError):
+            current_cpu = self._get_cpu_usage_fallback()
         current_time = time.time()
         self.cpu_usage_history.append(current_cpu)
         self.timestamps.append(current_time)
         self._update_task_metrics("cpu_usage", current_cpu)
+
+    def _get_cpu_usage_fallback(self) -> float:
+        """
+        Fallback method for getting CPU usage using subprocess.
+        :return: Approximate CPU usage percentage
+        """
+        try:
+            load_avg = subprocess.check_output("uptime", shell=True).decode().split("load average:")[1].split(",")[0].strip()
+            return float(load_avg) * 100 / psutil.cpu_count()
+        except Exception:
+            return 0.0  # Return 0.0 if unable to fetch
 
     def monitor_memory_usage(self) -> None:
         """
@@ -159,6 +174,7 @@ class InternalProcessMonitor:
         """
         return sum(values) / len(values) if values else 0
 
+
 # Example usage
 if __name__ == "__main__":
     monitor = InternalProcessMonitor(max_history_size=50)
@@ -172,5 +188,3 @@ if __name__ == "__main__":
 
     print(monitor.generate_task_report("Task 1"))
     print(monitor.get_historical_data())
-
-# Internal Monitor end 
