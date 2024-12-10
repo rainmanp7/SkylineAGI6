@@ -1,11 +1,13 @@
-
-# Beginning of parallel_utils.py
+# Parallel Utilities 
 from multiprocessing import Pool
 import asyncio
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
 from typing import List, Dict, Any
 import numpy as np
+import os
+import logging
+import time
 
 @dataclass
 class LearningTask:
@@ -20,7 +22,6 @@ class AsyncParallelExecutor:
         self.process_pool = ProcessPoolExecutor(max_workers=self.max_workers)
         self.task_queue: asyncio.PriorityQueue = asyncio.PriorityQueue()
         self.results: Dict[str, Any] = {}
-        self.locks: Dict[str, asyncio.Lock] = {}
         
     async def submit_task(self, task: LearningTask) -> None:
         """Submit a task to the priority queue."""
@@ -28,31 +29,28 @@ class AsyncParallelExecutor:
         
     async def process_task(self, task: LearningTask) -> Any:
         """Process a single learning task."""
-        if task.strategy_name not in self.locks:
-            self.locks[task.strategy_name] = asyncio.Lock()
-            
-        async with self.locks[task.strategy_name]:
-            loop = asyncio.get_event_loop()
-            try:
-                result = await loop.run_in_executor(
-                    self.process_pool,
-                    self._execute_strategy,
-                    task
-                )
-                self.results[task.strategy_name] = result
-                return result
-            except Exception as e:
-                logging.error(
-                    f"Error processing task {task.strategy_name}: {str(e)}",
-                    exc_info=True
-                )
-                return None
+        loop = asyncio.get_event_loop()
+        try:
+            result = await loop.run_in_executor(
+                self.process_pool,
+                self._execute_strategy,
+                task
+            )
+            self.results[task.strategy_name] = result
+            return result
+        except Exception as e:
+            logging.error(
+                f"Error processing task {task.strategy_name}: {str(e)}",
+                exc_info=True
+            )
+            return None
                 
-    def _execute_strategy(self, task: LearningTask) -> Any:
+    @staticmethod
+    def _execute_strategy(task: LearningTask) -> Any:
         """Execute learning strategy in separate process."""
         try:
             # Simulate strategy execution
-            time.sleep(np.random.random())  # Replace with actual strategy
+            time.sleep(np.random.random())  # Replace with actual strategy execution logic
             return {
                 'strategy': task.strategy_name,
                 'status': 'completed',
@@ -77,9 +75,8 @@ class AsyncParallelExecutor:
         
     async def cleanup(self) -> None:
         """Cleanup resources."""
-        self.process_pool.shutdown()
+        self.process_pool.shutdown(wait=True)
         self.results.clear()
-        self.locks.clear()
 
 # Usage example:
 async def main():
@@ -97,6 +94,4 @@ async def main():
 
 # Run the executor
 if __name__ == "__main__":
-    results = asyncio.run(main())
-
-# End of parallel_utils.py
+    asyncio.run(main())
