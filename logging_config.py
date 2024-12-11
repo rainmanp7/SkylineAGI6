@@ -1,6 +1,4 @@
-# Beginning of logging_config.py
-# Updated Sun Dec 8th 2024
-# Revised for startup and specific event logging only
+# logging_config.py start 
 
 import logging
 from logging.handlers import RotatingFileHandler
@@ -30,31 +28,35 @@ def setup_logging(log_level=logging.INFO):
     if not logger.hasHandlers():
         try:
             # Create a rotating file handler
-            handler = RotatingFileHandler(log_file, maxBytes=5 * 1024 * 1024, backupCount=5)  # 5 MB per file
+            file_handler = RotatingFileHandler(log_file, maxBytes=5 * 1024 * 1024, backupCount=5)  # 5 MB per file
         except PermissionError:
             print(f"No write access to log file: {log_file}. Falling back to console logging.")
-            handler = logging.StreamHandler()
+            file_handler = logging.StreamHandler()
         except Exception as e:
             print(f"Unexpected error while setting up file handler: {e}. Falling back to console logging.")
-            handler = logging.StreamHandler()
+            file_handler = logging.StreamHandler()
 
         # Custom formatter with day, date, and time
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt='%a %b %d %Y %H:%M:%S')
-        handler.setFormatter(formatter)
+        formatter = logging.Formatter('%(message)s. %(asctime)s', datefmt='%a %b %d %H:%M:%S %Y')
+        file_handler.setFormatter(formatter)
+
+        # Configure console handler with the same formatter
+        console_handler = logging.StreamHandler()
+        console_handler.setFormatter(formatter)
         
         # Configure logger
         logger.setLevel(log_level)
-        logger.addHandler(handler)
-        logger.addHandler(logging.StreamHandler())  # Log to console
-
-# Call this function at the start of your application
-setup_logging()
-
-# Example usage of logging in your application
-logger = logging.getLogger(__name__)
+        logger.addHandler(file_handler)
+        logger.addHandler(console_handler)
 
 def main():
     """Main function to run the application."""
+    # Call the setup_logging function before logging any messages
+    setup_logging()
+
+    # Get the logger
+    logger = logging.getLogger(__name__)
+
     logger.info("Application started.")  # Log application startup
 
     # Simulate an actual event
@@ -63,4 +65,5 @@ def main():
 
 if __name__ == "__main__":
     main()
-# End of logging_config.py
+
+# end of logging config.
