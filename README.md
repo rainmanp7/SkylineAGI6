@@ -21,7 +21,7 @@ parallel_utils.py -verified output
 
 complexity.py
 
-memory_manager.py
+memory_manager.py -validated
 
 parallel_bayesian_optimization.py -verified
 
