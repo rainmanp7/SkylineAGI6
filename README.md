@@ -30,4 +30,6 @@ memory_manager.py -validated
 
 parallel_bayesian_optimization.py -validated
 
+cache_utils.py -validated
+
 List is being updated actively.
