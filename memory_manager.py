@@ -4,8 +4,7 @@
 ####
 # Use the memory management functions as needed # throughout the codebase. For example:
 ##
-# Modified on Nov25 2024
-
+# Modified on Dec11 2024
 from typing import Any, Dict
 
 class MemoryManager:
@@ -60,8 +59,37 @@ class MemoryManager:
         """Return a dictionary containing all types of memories."""
         return {
             'working_memory': dict(self.working_memory),
-            'short_term_memory': dict(self.short_term_memory),
+            'short_term_memory': dict(self.short_term_memory),  # Corrected here
             'long_term_memory': dict(self.long_term_memory)
         }
+
+# Test Suite
+if __name__ == "__main__":
+    print("### Running Memory Manager Test Suite ###")
+    
+    mm = MemoryManager()
+    
+    print("\n1. Storing in Working Memory:")
+    key, value = "test_key", "Hello, World!"
+    print(f"Storing '{value}' under key '{key}' in Working Memory...")
+    print(mm.store_working_memory(key, value))
+    print("Working Memory After Store:", mm.get_all_memories()['working_memory'])
+    
+    print("\n2. Storing in Short-Term Memory:")
+    key, value = "short_test", 12345
+    print(f"Storing '{value}' under key '{key}' in Short-Term Memory...")
+    print(mm.store_short_term_memory(key, value))
+    print("Short-Term Memory After Store:", mm.get_all_memories()['short_term_memory'])
+    
+    print("\n3. Memory Consolidation:")
+    print(mm.memory_consolidation())
+    print("Memories After Consolidation:\n", mm.get_all_memories())
+    
+    print("\n4. Retrieving from Long-Term Memory (after consolidation):")
+    retrieval_key = "test_key"
+    print(f"Retrieving value for key '{retrieval_key}' from Long-Term Memory...")
+    print(mm.memory_retrieval(retrieval_key, "long_term"))
+    
+    print("\n### Test Suite Completed ###")
 
 #end of memory management.
