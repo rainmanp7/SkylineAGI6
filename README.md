@@ -9,7 +9,7 @@ work it's because it's highly active with bugs and who knows what.
 Working files that compile by themselves.
 12/10/2024
 
-logging_config.py
+logging_config.py -verified output
 
 uncertainty_quantification.py
 
@@ -17,7 +17,7 @@ agi_config.py
 
 internal_process_monitor.py
 
-parallel_utils.py
+parallel_utils.py -verified output
 
 complexity.py
 
