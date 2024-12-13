@@ -1,5 +1,3 @@
-
-# Beginning of config.json
 {
   "inputs": [
     "wi0",
@@ -58,13 +56,9 @@
   },
   "random_seed": 42,
   "model_save_dir": "./models",
-  "num_parallel_jobs": 4
+  "num_parallel_jobs": 4,
+  "database": {
+    "knowledge_base_path": "knowledge_base",
+    "domain_dataset_config": "domain_dataset.json"
+  }
 }
-{
-    "database": {
-        "knowledge_base_path": "knowledge_base",
-        "domain_dataset_config": "domain_dataset.json"
-    }
-}
-
-# End of config.json
