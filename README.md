@@ -32,4 +32,8 @@ parallel_bayesian_optimization.py -validated
 
 cache_utils.py -validated
 
+config.json -validated
+
+agi_config.py -validated
+
 List is being updated actively.
