@@ -1,129 +1,174 @@
-# complexity.py updated 12/10/2024
-
-from sklearn.linear_model import LinearRegression, Ridge, Lasso
-from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
-from sklearn.neural_network import MLPRegressor
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-from dataclasses import dataclass
-from typing import Any, Dict, Optional, Tuple, Callable
+# complexity.py updated 12/14/2024
+# imports corrected.
+from enum import Enum
+from typing import Any, Callable, List
+import numpy as np
+import scipy.stats as stats
 import logging
-from knowledge_base import TieredKnowledgeBase
-from assimilation_memory_module import AssimilationMemoryModule
+import json
 
-@dataclass
-class ModelConfig:
-    """
-    Configuration for a machine learning model.
-    """
-    model_class: Any
-    default_params: Dict[str, Any]
-    complexity_level: str
-    suggested_iterations: int
-    suggested_metric: Callable
-    quality_score: float
+class ComplexityRange(Enum):
+    """Detailed complexity ranges for nuanced classification"""
+    EASY = (1111, 1389)
+    SIMP = (1390, 1668)
+    NORM = (1669, 1947)
+    MODS = (1948, 2226)
+    HARD = (2227, 2505)
+    PARA = (2506, 2784)
+    VICE = (2785, 3063)
+    ZETA = (3064, 3342)
+    TETR = (3343, 3621)
+    EAFV = (3622, 3900)
+    SIPO = (3901, 4179)
+    NXXM = (4180, 4458)
+    MIDS = (4459, 4737)
+    HAOD = (4738, 5016)
+    PARZ = (5017, 5295)
+    VIFF = (5296, 5574)
+    ZEXA = (5575, 5853)
+    SIP8 = (5854, 6132)
+    NXVM = (6133, 6411)
+    VIDS = (6412, 6690)
+    HA3D = (6691, 6969)
+    PFGZ = (6970, 7248)
+    VPFF = (7249, 7527)
+    Z9XA = (7528, 7806)
+    TIPO = (7807, 8085)
+    NXNM = (8086, 8364)
+    MPD7 = (8365, 9918)
 
+    @staticmethod
+    def normalize_to_range(value: float) -> int:
+        """Map a raw complexity score to a specific number within the defined ranges."""
+        for level in ComplexityRange:
+            min_val, max_val = level.value
+            if min_val <= value <= max_val:
+                return int(round(value))
+        # Default to the minimum of the first range
+        return ComplexityRange.EASY.value[0]
 
-class EnhancedModelSelector:
-    """
-    Enhanced model selector based on the 9-tier complexity system.
-    """
-    def __init__(self, knowledge_base: TieredKnowledgeBase, assimilation_module: AssimilationMemoryModule):
-        """
-        Initialize the enhanced model selector.
-        """
-        self.knowledge_base = knowledge_base
-        self.assimilation_module = assimilation_module
-        self.complexity_tiers = self._validate_tier_ranges({
-            # Example tiers
-            'easy': (1000, 1200, mean_squared_error),
-            'imp': (1201, 1400, mean_squared_error),
-            'norm': (1401, 1600, mean_absolute_error),
-            'ods': (1601, 1800, mean_absolute_error),
-            'hard': (1801, 2000, mean_absolute_error),
-            'para': (2001, 2200, r2_score),
-            'vice': (2201, 2400, r2_score),
-            'zeta': (2401, 2600, r2_score),
-            'tetr': (2601, 2800, r2_score),
-            # Add remaining tiers as necessary
-        })
-        self.model_configs = self._configure_models()
-
-    def _validate_tier_ranges(self, tier_ranges: Dict[str, Tuple[int, int, Callable]]) -> Dict[str, Tuple[int, int, Callable]]:
-        """
-        Validate the tier ranges to ensure non-overlapping complexity ranges.
-        """
-        sorted_tiers = sorted(tier_ranges.items(), key=lambda x: x[1][0])
-        for i in range(len(sorted_tiers) - 1):
-            if sorted_tiers[i][1][1] >= sorted_tiers[i + 1][1][0]:
-                raise ValueError("Overlapping tier ranges detected")
-        return tier_ranges
-
-    def _configure_models(self) -> Dict[str, ModelConfig]:
-        """
-        Configure the models for each complexity range.
-        """
-        return {
-            'easy': ModelConfig(LinearRegression, {}, 'easy', 100, mean_squared_error, 0.8),
-            'imp': ModelConfig(Ridge, {'alpha': 1.0}, 'imp', 200, mean_squared_error, 0.85),
-            'norm': ModelConfig(Lasso, {'alpha': 1.0}, 'norm', 300, mean_absolute_error, 0.9),
-            'ods': ModelConfig(RandomForestRegressor, {'n_estimators': 50}, 'ods', 400, mean_absolute_error, 0.92),
-            'hard': ModelConfig(RandomForestRegressor, {'n_estimators': 100}, 'hard', 500, mean_absolute_error, 0.95),
-            'para': ModelConfig(GradientBoostingRegressor, {'n_estimators': 100}, 'para', 600, r2_score, 0.98),
-            # Add remaining model configurations
-        }
-
-    def _get_tier(self, complexity_factor: float) -> str:
-        """
-        Determine the tier for a given complexity factor.
-        """
-        for tier, (min_comp, max_comp, _) in self.complexity_tiers.items():
-            if min_comp <= complexity_factor <= max_comp:
-                return tier
-        return 'easy'  # Default to 'easy'
-
-    def choose_model_and_config(
-        self, complexity_factor: float, custom_params: Optional[Dict[str, Any]] = None
-    ) -> Tuple[Any, Callable, int]:
-        """
-        Enhanced model selection based on the 9-tier complexity system.
-        """
+class ComplexityMetrics:
+    """Advanced complexity analysis with multiple computational strategies"""
+    
+    @staticmethod
+    def calculate_entropy(text: str) -> float:
+        """Calculate Shannon entropy to measure text complexity and randomness."""
         try:
-            complexity_factor = max(1000, min(6600, complexity_factor))  # Clamp value
-            tier = self._get_tier(complexity_factor)
-            config = self.model_configs[tier]
-            params = config.default_params.copy()
-            if custom_params:
-                params.update(custom_params)
-            model = config.model_class(**params)
-            return model, config.suggested_metric, config.suggested_iterations
+            ascii_values = [ord(char) for char in text]
+            unique, counts = np.unique(ascii_values, return_counts=True)
+            probabilities = counts / len(ascii_values)
+            entropy = -np.sum(probabilities * np.log2(probabilities + 1e-10))
+            return entropy
         except Exception as e:
-            logging.error(f"Error in enhanced model selection: {str(e)}", exc_info=True)
-            return LinearRegression(), mean_squared_error, 100  # Fallback
+            logging.error(f"Entropy calculation error: {e}")
+            return 0
 
-    def get_tier_details(self, tier: str) -> Dict[str, Any]:
-        """
-        Get details for a specific tier.
-        """
+    @staticmethod
+    def calculate_variance_complexity(text: str) -> float:
+        """Calculate complexity based on variance of ASCII values."""
         try:
-            if tier in self.model_configs:
-                config = self.model_configs[tier]
-                min_comp, max_comp, metric = self.complexity_tiers[tier]
-                return {
-                    'complexity_range': (min_comp, max_comp),
-                    'model_class': config.model_class.__name__,
-                    'default_params': config.default_params,
-                    'iterations': config.suggested_iterations,
-                    'metric': metric.__name__,
-                }
-            else:
-                raise ValueError("Tier not found")
+            ascii_values = np.array([ord(char) for char in text])
+            variance = np.var(ascii_values)
+            skewness = stats.skew(ascii_values)
+            kurtosis = stats.kurtosis(ascii_values)
+            
+            # Combine multiple statistical measures
+            complexity_score = (
+                variance * 
+                (1 + abs(skewness)) * 
+                (1 + abs(kurtosis) / 2)
+            )
+            return complexity_score
         except Exception as e:
-            logging.error(f"Error in getting tier details: {str(e)}", exc_info=True)
-            return {}
+            logging.error(f"Variance complexity calculation error: {e}")
+            return 0
 
+class AdvancedComplexityFactor:
+    """Comprehensive complexity analysis with multiple metrics."""
+    
+    def __init__(self, custom_complexity_func: Callable[[str], int] = None):
+        """Initialize with optional custom complexity calculation."""
+        self.custom_complexity_func = custom_complexity_func
+        self.metrics_log = []
 
-# Example usage:
-# knowledge_base = TieredKnowledgeBase()
-# assimilation_module = AssimilationMemoryModule()
-# model_selector = EnhancedModelSelector(knowledge_base, assimilation_module)
-# model, metric, iterations = model_selector.choose_model_and_config(1500)
+    def calculate(self, text: str) -> int:
+        """Comprehensive complexity calculation."""
+        try:
+            # Calculate multiple complexity metrics from the text
+            metrics = {
+                'entropy': ComplexityMetrics.calculate_entropy(text),
+                'variance': ComplexityMetrics.calculate_variance_complexity(text),
+            }
+
+            # Custom complexity function if provided
+            if self.custom_complexity_func:
+                custom_complexity = self.custom_complexity_func(text)
+                metrics['custom'] = custom_complexity
+
+            # Aggregate complexity metrics
+            total_complexity = sum(metrics.values())
+
+            # Scale raw complexity to the defined range
+            raw_value = 1111 + ((total_complexity % 1) * (9918 - 1111))
+
+            # Map the normalized value to the appropriate range
+            exact_value = ComplexityRange.normalize_to_range(raw_value)
+
+            # Log complexity analysis
+            complexity_analysis = {
+                'metrics': metrics,
+                'total_complexity': total_complexity,
+                'raw_value': raw_value,
+                'exact_value': exact_value,
+            }
+            
+            self.metrics_log.append(complexity_analysis)
+
+            return exact_value
+
+        except Exception as e:
+            logging.error(f"Comprehensive complexity calculation error: {e}")
+            return ComplexityRange.EASY.value[0]  # Return default range's minimum value
+
+    def export_complexity_log(self, filename: str = 'complexity_log.json'):
+        """Export complexity metrics log to a JSON file."""
+        try:
+            with open(filename, 'w') as f:
+                json.dump(self.metrics_log, f, indent=4)
+                
+            logging.info(f"Complexity log exported to {filename}")
+            
+        except Exception as e:
+            logging.error(f"Complexity log export error: {e}")
+
+# Example custom complexity function (optional)
+def custom_text_complexity(text: str) -> float:
+    """Example of a custom complexity calculation based on specific criteria."""
+    return len(set(text)) / len(text) if len(text) > 0 else 0.0
+
+# Example usage
+def main():
+    # Configure logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s: %(message)s'
+    )
+
+    # Example input text (you can replace this with any text you want to analyze)
+    input_text = "This is an example sentence to analyze the complexity of the text."
+
+    # Initialize the complexity factor with an optional custom function.
+    complexity_analyzer = AdvancedComplexityFactor(
+        custom_complexity_func=custom_text_complexity
+    )
+
+    # Calculate the data complexity level.
+    complexity = complexity_analyzer.calculate(input_text)
+    
+    print(f"Data Complexity Exact Value: {complexity}")
+
+    # Export the complexity log to a JSON file.
+    complexity_analyzer.export_complexity_log()
+
+if __name__ == "__main__":
+    main()
