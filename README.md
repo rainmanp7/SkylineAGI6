@@ -36,4 +36,6 @@ config.json -validated
 
 agi_config.py -validated
 
+metacognitive_manager.py -validated
+
 List is being updated actively.
