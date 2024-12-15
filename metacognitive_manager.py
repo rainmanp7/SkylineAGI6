@@ -1,6 +1,6 @@
 
-
 # metacognitive_manager.py
+# Updated Dec 15 2024
 
 from dataclasses import dataclass
 from typing import Dict, List, Any, Optional, Tuple
@@ -126,5 +126,37 @@ class MetaCognitiveManager:
             'performance': self.system_state.performance_metrics.get(component_name),
             'capabilities': self.system_state.capabilities.get(component_name)
         }
+
+# Standalone Execution
+if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(levelname)s: %(message)s"
+    )
+
+    logging.info("Initializing MetaCognitiveManager for standalone execution...")
+    manager = MetaCognitiveManager()
+
+    # Simulate performance data for 10 models
+    simulated_data = [
+        ("Model_A", (0.2, 0.15, 0.85)),
+        ("Model_B", (0.3, 0.25, 0.75)),
+        ("Model_C", (0.1, 0.05, 0.95)),
+        ("Model_D", (0.25, 0.2, 0.8)),
+        ("Model_E", (0.35, 0.3, 0.7)),
+        ("Model_F", (0.4, 0.35, 0.65)),
+        ("Model_G", (0.2, 0.18, 0.88)),
+        ("Model_H", (0.28, 0.22, 0.78)),
+        ("Model_I", (0.3, 0.27, 0.73)),
+        ("Model_J", (0.15, 0.1, 0.9))
+    ]
+
+    for model, performance in simulated_data:
+        manager.monitor_performance(model, performance)
+
+    manager.update_system_parameters()
+
+    logging.info(f"Final system state: {manager.system_state}")
+
 
 # End of metacog manager.
