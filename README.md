@@ -11,14 +11,12 @@ Working files that compile by themselves.
 12/10/2024
 
 validated = compiled no errors,and no warnings
-Operational ogic 
+Operational Logic 
 results came back and printed results to console.
 
 logging_config.py -validated
 
 uncertainty_quantification.py -validated
-
-agi_config.py
 
 internal_process_monitor.py -validated
 
