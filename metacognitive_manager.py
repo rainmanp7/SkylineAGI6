@@ -1,12 +1,14 @@
 
+# Metacognitive Manager
 # metacognitive_manager.py
-# Updated Dec 15 2024
+# updated Dec15 with multiprocessing.
 
-from dataclasses import dataclass
-from typing import Dict, List, Any, Optional, Tuple
+import multiprocessing
 import numpy as np
 import logging
 import time
+from dataclasses import dataclass
+from typing import Dict, List, Any, Optional, Tuple
 
 @dataclass
 class SystemState:
@@ -76,10 +78,13 @@ class MetaCognitiveManager:
         Periodically run metacognitive tasks, such as monitoring performance and updating system parameters.
         """
         while True:
-            for component in self.system_state.active_components:
-                metrics = self.system_state.performance_metrics.get(component)
-                if metrics:
-                    self.monitor_performance(component, metrics)
+            with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
+                # Prepare the arguments for the monitor_performance function
+                args = [(component, self.system_state.performance_metrics.get(component))
+                        for component in self.system_state.active_components if self.system_state.performance_metrics.get(component)]
+                
+                # Use pool.starmap to apply monitor_performance to each argument tuple
+                pool.starmap(self.monitor_performance, args)
             
             self.update_system_parameters()
             time.sleep(60)  # Run metacognitive tasks every minute
@@ -151,12 +156,26 @@ if __name__ == "__main__":
         ("Model_J", (0.15, 0.1, 0.9))
     ]
 
-    for model, performance in simulated_data:
-        manager.monitor_performance(model, performance)
+    # Get the number of available CPUs
+    cpu_count = multiprocessing.cpu_count()
+    print(f"Available CPU count: {cpu_count}")
+
+    # Simulate adding active components
+    manager.system_state.active_components = [model for model, _ in simulated_data]
+
+    # Use a pool of workers to simulate performance monitoring
+    with multiprocessing.Pool(processes=cpu_count) as pool:
+        # Prepare the arguments for the monitor_performance function
+        args = [(model, performance) for model, performance in simulated_data]
+        
+        # Use pool.starmap to apply monitor_performance to each argument tuple
+        pool.starmap(manager.monitor_performance, args)
 
     manager.update_system_parameters()
 
     logging.info(f"Final system state: {manager.system_state}")
 
+    # Display the number of CPUs used
+    print(f"Used CPU count: {cpu_count}")
 
-# End of metacog manager.
+# end of metacog multiproc
